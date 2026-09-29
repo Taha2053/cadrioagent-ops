@@ -1,0 +1,48 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments & package managers
+.venv/
+venv/
+env/
+.uv/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Datasets, audio, and ML artifacts
+ourdataset/
+data/
+datasets/
+models/*.pt
+models/*.onnx
+models/*.pkl
+*.wav
+
+# Testing, linting, and coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Distribution & builds
+build/
+dist/
+wheels/
+*.egg-info/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

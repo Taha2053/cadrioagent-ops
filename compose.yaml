@@ -1,0 +1,12 @@
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/api-gateway.Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - cardio-network
+
+networks:
+  cardio-network:

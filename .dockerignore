@@ -1,0 +1,42 @@
+# Version control
+.git
+.gitignore
+
+# Virtual environments
+.venv
+**/.venv
+**/.uv
+
+# Python bytecode & cache (**/ required for nested paths)
+**/__pycache__
+**/*.py[cod]
+**/*$py.class
+
+# Secrets
+**/.env*
+!.env.example
+
+# Datasets and local audio files
+ourdataset
+**/ourdataset
+data
+**/data
+*.wav
+**/*.wav
+
+# Testing, linting, and coverage
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.coverage*
+**/htmlcov
+
+# OS & IDE
+**/.DS_Store
+**/Thumbs.db
+**/.idea
+**/.vscode
+
+# Compose & docs
+compose*.yaml
+README.md
