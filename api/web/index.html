@@ -1,69 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CardioAgent | Upload PCG</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CardioAgent — Acoustic research workbench</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/wav.js" defer></script>
+  <script src="/static/app.js" defer></script>
 </head>
 <body>
-  <main class="card">
-    <h1>CardioAgent</h1>
-    <p>Upload a heart sound recording in WAV format.</p>
-
-    <form id="upload-form">
-      <label for="audio-file">Choose a recording</label>
-      <input
-        id="audio-file"
-        name="file"
-        type="file"
-        accept=".wav,audio/wav"
-        required
-      >
-
-      <button type="submit">Upload WAV</button>
-    </form>
-
-    <p id="message" role="status"></p>
-    <pre id="result" hidden></pre>
+  <header><a class="brand" href="/">CardioAgent<span>Acoustic research workbench</span></a><button id="refresh" class="secondary">Check services</button></header>
+  <main>
+    <section class="intro"><h1>Listen closer.<br>Reason with evidence.</h1><p>Explore a heart-sound recording through acoustic analysis and source-grounded research.</p></section>
+    <div id="services" class="services" aria-live="polite">Checking local services…</div>
+    <div class="workspace">
+      <section class="recording" aria-labelledby="recording-title">
+        <h2 id="recording-title">Recording</h2>
+        <form id="upload-form">
+          <label id="drop" class="drop" for="audio-file"><strong>Choose or drop a WAV recording</strong><span>RIFF/WAVE, up to 20 MiB, 120 seconds</span><input id="audio-file" name="file" type="file" accept=".wav,audio/wav" required></label>
+          <div class="signal"><canvas id="waveform" width="900" height="180" aria-label="Waveform of uploaded recording"></canvas><p id="file-info">Your recording’s waveform will appear here.</p><audio id="playback" controls hidden></audio></div>
+          <label for="prompt">Research question <span class="muted">(optional)</span></label>
+          <textarea id="prompt" name="prompt" maxlength="2000" rows="3" placeholder="What evidence is relevant to this recording?"></textarea>
+          <label for="api-key">Gateway key <span class="muted">(only if configured)</span></label>
+          <input id="api-key" type="password" autocomplete="off" placeholder="Kept only in this page’s memory">
+          <label class="consent"><input id="consent" type="checkbox"><span>I consent to sending derived results and retrieved evidence to DeepSeek if the server is configured for external processing. Audio and my question stay local.</span></label>
+          <div class="actions"><button id="analyze" type="submit">Analyze recording</button><button id="cancel" class="secondary" type="button" disabled>Cancel</button></div>
+        </form>
+        <p class="notice">Research software, not a medical device. Do not upload identifying patient information. A PCG classification is not a diagnosis.</p>
+      </section>
+      <section class="analysis" aria-labelledby="analysis-title">
+        <div class="section-head"><h2 id="analysis-title">Analysis & evidence</h2><button id="download" class="secondary" disabled>Export JSON</button></div>
+        <p id="message" role="status">Choose a recording to begin.</p>
+        <ol id="stages"><li data-stage="audio_analysis">Acoustic analysis</li><li data-stage="retrieval">Evidence retrieval</li><li data-stage="report_generation">Research synthesis</li><li data-stage="validation">Safety & citation audit</li></ol>
+        <div id="result" hidden>
+          <div class="classification"><span id="classification"></span><span id="probability"></span></div>
+          <p id="provenance" class="muted"></p>
+          <div id="report"></div>
+          <h3>Retrieved evidence</h3><div id="sources"></div>
+        </div>
+        <details id="draft-panel" hidden><summary>Unaudited generation stream</summary><p class="notice">Raw draft. Not a validated report. Do not use for clinical decisions.</p><pre id="draft"></pre></details>
+      </section>
+    </div>
   </main>
-
-  <script>
-    const form = document.querySelector("#upload-form");
-    const fileInput = document.querySelector("#audio-file");
-    const message = document.querySelector("#message");
-    const result = document.querySelector("#result");
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      message.textContent = "Uploading...";
-      result.hidden = true;
-
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
-
-      try {
-        const response = await fetch("/analyze_pcg", {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          message.textContent = data.detail || "Upload failed.";
-          return;
-        }
-
-        message.textContent = "File received successfully.";
-        result.textContent = JSON.stringify(data, null, 2);
-        result.hidden = false;
-      } catch (error) {
-        message.textContent = "Could not connect to the server.";
-        console.error(error);
-      }
-    });
-  </script>
+  <footer>CardioAgent-Ops / ENSIT <span>Local-first research. Traceable models. Verifiable sources.</span></footer>
 </body>
 </html>
