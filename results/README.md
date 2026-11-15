@@ -59,13 +59,37 @@ installed. Core verification passed 28 tests; the optional deep-export verificat
 separately passed all three CNN/ResNet/Transformer–CNN cases. Core test coverage
 was 59%; CLI training/ingestion smoke runs are not counted as unit coverage.
 
+## Live resource snapshot
+
+`runtime-profile.json` records one real request while CPU model training was also
+running. These are container working-set snapshots, not peak RSS or an SLA.
+
+| Service | Observed memory |
+|---|---:|
+| Agent orchestrator | 314.6 MiB |
+| API gateway | 43.36 MiB |
+| Audio engine | 327.2 MiB |
+| LLM facade | 42.14 MiB |
+| MLflow server, one worker | 1.57 GiB |
+| Qdrant | 72.21 MiB |
+
+The local Ollama process reported **2,328 MiB VRAM** during generation; desktop GPU
+usage is not attributed to the project. Deep-model training in this experiment
+used the CPU, not CUDA.
+
+That request's first token arrived after 8.96 seconds and the stream completed
+after 151.61 seconds. Its final report was **rejected by the deterministic audit**;
+it must not be counted as a successful report or clinical-quality evaluation.
+A separate browser request passed the audit. Repeated controlled load tests are
+needed before interpreting either request as representative latency or reliability.
+
 ## Outstanding evidence before quality claims
 
 - Complete GPU training/tuning and held-out comparison of the three deep model families.
 - Clinician-adjudicated retrieval/LLM safety and clinical-correctness evaluations.
 - Verified patient identities or a genuinely independent external dataset.
 - Probability calibration and confidence intervals on a separately reserved cohort.
-- Realistic concurrent-load measurements, cold-start latency, and memory/VRAM profiling.
+- Repeated warm/cold concurrent-load measurements and peak memory/VRAM profiling.
 - DeepSeek live verification after a local key is configured, with per-request consent.
 
 Never label code availability, a smoke test, or schema/quote matching as medical readiness.

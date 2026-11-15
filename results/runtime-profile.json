@@ -1,0 +1,38 @@
+{
+  "samples": 1,
+  "conditions": "Concurrent CPU model training; not an idle-system SLA",
+  "seconds_to_first_token": 8.962750962000428,
+  "container_memory": [
+    {
+      "name": "cardioagent-ops-agent-orchestrator-1",
+      "memory": "314.6MiB / 23.18GiB"
+    },
+    {
+      "name": "cardioagent-ops-api-gateway-1",
+      "memory": "43.36MiB / 23.18GiB"
+    },
+    {
+      "name": "cardioagent-ops-audio-engine-1",
+      "memory": "327.2MiB / 23.18GiB"
+    },
+    {
+      "name": "cardioagent-ops-llm-server-1",
+      "memory": "42.14MiB / 23.18GiB"
+    },
+    {
+      "name": "cardioagent-ops-mlflow-server-1",
+      "memory": "1.57GiB / 23.18GiB"
+    },
+    {
+      "name": "cardioagent-ops-vector-db-1",
+      "memory": "72.21MiB / 23.18GiB"
+    }
+  ],
+  "gpu_compute_process_memory_mib": [
+    "/usr/bin/plasmashell, 680",
+    "/usr/local/bin/ollama, 2328"
+  ],
+  "status": "rejected",
+  "audit_passed": false,
+  "end_to_end_seconds": 151.60805721700035
+}
