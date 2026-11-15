@@ -234,7 +234,7 @@ def run(args):
         return result
 
 
-def activate(path: Path, vault: Path):
+def verify_artifact(path: Path):
     import onnxruntime as ort
     metadata = json.loads(path.with_suffix(".json").read_text())
     if metadata["feature_contract"] != VERSION or metadata["onnx_sha256"] != hashlib.sha256(path.read_bytes()).hexdigest():
@@ -244,8 +244,14 @@ def activate(path: Path, vault: Path):
     if metadata["validation"]["specificity"] < metadata["minimum_specificity"]:
         raise ValueError("Artifact fails the validation specificity gate")
     ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    return metadata
+
+
+def activate(path: Path, vault: Path):
+    verify_artifact(path)
     target = vault / "models"
     target.mkdir(parents=True, exist_ok=True)
+    (target / "registry.json").unlink(missing_ok=True)
     # Stage both artifacts, then replace; consumers reject a mismatched pair during a concurrent restart.
     shutil.copy2(path, target / "cardio_model.onnx.tmp")
     shutil.copy2(path.with_suffix(".json"), target / "cardio_model.json.tmp")

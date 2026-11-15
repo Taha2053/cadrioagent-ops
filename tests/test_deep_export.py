@@ -1,7 +1,6 @@
 """Optional deep runtime: an exported model must accept only canonical Mel input."""
 import json
 import hashlib
-import numpy as np
 import pytest
 
 pytest.importorskip("tensorflow", reason="Run with the deep-learning extra to verify Keras exports")
