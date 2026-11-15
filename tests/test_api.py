@@ -38,3 +38,34 @@ def test_readiness_does_not_confuse_liveness_with_loaded_model():
         result=client.get("/status")
     assert result.status_code==503
     assert result.json()["ready"] is False
+
+
+def test_overload_rejects_before_buffering_more_recordings():
+    import asyncio
+    from api.main import MAX_ACTIVE_ANALYSES
+
+    async def scenario():
+        entered = asyncio.Queue()
+        release = asyncio.Event()
+        async def handler(request):
+            entered.put_nowait(True)
+            await release.wait()
+            return httpx.Response(200, json={"status": "abstained", "report": None})
+        app = create_app(Settings(), httpx.MockTransport(handler))
+        async with app.router.lifespan_context(app):
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://gateway.test") as client:
+                async def upload():
+                    return await client.post("/analyze_pcg", files={"file": ("heart.wav", wav_bytes(), "audio/wav")})
+                active = [asyncio.create_task(upload()) for _ in range(MAX_ACTIVE_ANALYSES)]
+                try:
+                    for _ in active:
+                        await asyncio.wait_for(entered.get(), timeout=5)
+                    overloaded = await upload()
+                    assert overloaded.status_code == 429
+                    assert overloaded.headers["Retry-After"] == "2"
+                finally:
+                    release.set()
+                    replies = await asyncio.gather(*active)
+                assert all(reply.status_code == 200 for reply in replies)
+                assert (await upload()).status_code == 200
+    asyncio.run(scenario())

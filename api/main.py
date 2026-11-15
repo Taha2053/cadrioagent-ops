@@ -33,6 +33,7 @@ WEB_DIR = Path(__file__).parent / "web"
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 MAX_PROMPT_CHARS = 2000
+MAX_ACTIVE_ANALYSES = 4
 # Multipart framing plus a prompt of MAX_PROMPT_CHARS multi-byte characters.
 _BODY_SLACK_BYTES = 128 * 1024
 _READ_CHUNK_BYTES = 1024 * 1024
@@ -106,6 +107,7 @@ class GatewayGuard:
     def __init__(self, app: ASGIApp, api_key: str | None) -> None:
         self.app = app
         self.api_key = api_key.encode() if api_key else None
+        self.slots = asyncio.Semaphore(MAX_ACTIVE_ANALYSES)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -124,7 +126,20 @@ class GatewayGuard:
         if rejection is not None:
             await rejection(scope, receive, send_with_headers)
             return
-        await self.app(scope, receive, send_with_headers)
+        if scope["path"] not in _UPLOAD_PATHS or scope["method"] != "POST":
+            await self.app(scope, receive, send_with_headers)
+            return
+        if self.slots.locked():
+            await JSONResponse(
+                {"detail": "Analysis capacity reached; retry after an active request completes."},
+                status_code=429, headers={"Retry-After": "2"},
+            )(scope, receive, send_with_headers)
+            return
+        await self.slots.acquire()
+        try:
+            await self.app(scope, receive, send_with_headers)
+        finally:
+            self.slots.release()
 
     def _reject(self, scope: Scope) -> JSONResponse | None:
         path = scope["path"]
