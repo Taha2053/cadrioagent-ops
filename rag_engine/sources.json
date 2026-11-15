@@ -1,0 +1,15 @@
+{
+  "esc-valvular-patient-guidelines.pdf": {
+    "url": "https://dam-assets.escardio.org/download/d03e425029d311f19bc0727cfbefc49c",
+    "title": "ESC/EACTS valvular heart disease patient guidelines",
+    "kind": "patient guideline, not full professional guideline",
+    "discovery_url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/guidelines-for-patients/"
+  },
+  "esc-2025-vhd-professional.pdf": {
+    "url": "https://academic.oup.com/eurheartj/article-lookup/doi/10.1093/eurheartj/ehaf194",
+    "download_url": "https://fmed.bu.edu.eg/images/Valve_guidelines_20251.pdf",
+    "title": "2025 ESC/EACTS Guidelines for the management of valvular heart disease",
+    "kind": "full professional guideline, 102 pages",
+    "discovery_url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/valvular-heart-disease"
+  }
+}
