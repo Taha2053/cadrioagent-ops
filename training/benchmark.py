@@ -39,10 +39,10 @@ def deep_model(name, learning_rate=1e-3):
     inputs = k.Input((96, 96, 1), name="features")
     backbone = None
     if name == "resnet50":
-        # Shared mel in [-1,0] -> [0,255], repeated RGB and standard ResNet BGR mean subtraction.
-        x = k.layers.Rescaling(255., 255.)(inputs)
-        x = k.layers.Concatenate()([x, x, x])
-        x = k.applications.resnet.preprocess_input(x)
+        # Grayscale channels are identical, so RGB/BGR reversal is unnecessary.
+        # Keep ImageNet affine preprocessing inside a traced layer, not captured eager tensors.
+        x = k.layers.Concatenate()([inputs, inputs, inputs])
+        x = k.layers.Rescaling(255., offset=[151.061, 138.221, 131.32], name="imagenet_preprocess")(x)
         backbone = k.applications.ResNet50(include_top=False, weights="imagenet", input_shape=(96, 96, 3))
         backbone.trainable = False
         x = backbone(x, training=False)
