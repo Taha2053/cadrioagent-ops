@@ -4,8 +4,8 @@
 
 # Virtual environments
 .venv
-**/.venv
-**/.uv
+venv
+.uv
 
 # Python bytecode & cache (**/ required for nested paths)
 **/__pycache__
@@ -17,12 +17,18 @@
 !.env.example
 
 # Datasets and local audio files
-ourdataset
-**/ourdataset
-data
-**/data
+/ourdataset
+/data
+/datasets
 *.wav
 **/*.wav
+/vault
+/models
+/artifacts
+/mlruns
+/mlartifacts
+**/*.pdf
+**/*.ipynb
 
 # Testing, linting, and coverage
 **/.pytest_cache

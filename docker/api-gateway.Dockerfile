@@ -1,20 +1,18 @@
-FROM python:3.13-slim
-
-# Copy uv from its official container image.
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-WORKDIR /app
-
-# Copy dependency definitions and install them first.
+FROM ghcr.io/astral-sh/uv:0.9.18 AS uv
+FROM python:3.13-slim AS builder
+COPY --from=uv /uv /usr/local/bin/uv
+WORKDIR /build
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --no-dev --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked \
+    uv export --locked --only-group gateway-runtime --no-emit-project -o /tmp/runtime.txt \
+    && uv pip install --python /usr/local/bin/python --prefix /install --require-hashes -r /tmp/runtime.txt
 
-# Copy the application.
+FROM python:3.13-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY --from=builder /install /usr/local
 COPY api/ ./api/
-
-# Use executables installed in uv's virtual environment.
-ENV PATH="/app/.venv/bin:$PATH"
-
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
 EXPOSE 8000
-
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

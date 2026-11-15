@@ -23,6 +23,17 @@ models/*.pt
 models/*.onnx
 models/*.pkl
 *.wav
+vault/
+artifacts/
+mlruns/
+mlartifacts/
+*.joblib
+*.gguf
+*.safetensors
+*.h5
+*.keras
+coverage.xml
+evaluation-results*.json
 
 # Testing, linting, and coverage
 .pytest_cache/

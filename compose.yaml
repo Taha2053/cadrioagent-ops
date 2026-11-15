@@ -1,12 +1,141 @@
+name: cardioagent-ops
+
+x-python-health: &python-health
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 30s
+
 services:
+  llm-server:
+    build:
+      context: .
+      dockerfile: docker/llm-server.Dockerfile
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:7b-instruct}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-180}
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["127.0.0.1:8001:8001"]
+    healthcheck:
+      <<: *python-health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health')"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [cardio-network]
+
+  vector-db:
+    build:
+      context: .
+      dockerfile: docker/vector-db.Dockerfile
+    ports: ["127.0.0.1:6333:6333"]
+    volumes: [qdrant-data:/qdrant/storage]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [cardio-network]
+
+  audio-engine:
+    build:
+      context: .
+      dockerfile: docker/audio-engine.Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    environment:
+      AUDIO_MODEL_PATH: /vault/models/cardio_model.onnx
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      MLFLOW_TRACKING_ENABLED: ${MLFLOW_TRACKING_ENABLED:-true}
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+    ports: ["127.0.0.1:8002:8002"]
+    volumes: ["./vault:/vault:ro"]
+    depends_on:
+      mlflow-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *python-health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/health')"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [cardio-network]
+
+  agent-orchestrator:
+    build:
+      context: .
+      dockerfile: docker/agent-orchestrator.Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    environment:
+      AUDIO_ENGINE_URL: http://audio-engine:8002
+      LLM_SERVER_URL: http://llm-server:8001
+      HOME: /tmp
+      QDRANT_URL: http://vector-db:6333
+      QDRANT_COLLECTION: esc_guidelines
+      EMBEDDING_MODEL: BAAI/bge-small-en-v1.5
+      FASTEMBED_CACHE_PATH: /vault/cache/fastembed
+      VAULT_DIR: /vault
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      RAG_SCORE_THRESHOLD: ${RAG_SCORE_THRESHOLD:-0.55}
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OMP_NUM_THREADS: "2"
+    ports: ["127.0.0.1:8003:8003"]
+    volumes: ["./vault:/vault"]
+    depends_on:
+      audio-engine:
+        condition: service_healthy
+      llm-server:
+        condition: service_healthy
+      vector-db:
+        condition: service_started
+    healthcheck:
+      <<: *python-health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/health')"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [cardio-network]
+
   api-gateway:
     build:
       context: .
       dockerfile: docker/api-gateway.Dockerfile
-    ports:
-      - "8000:8000"
-    networks:
-      - cardio-network
+    environment:
+      ORCHESTRATOR_URL: http://agent-orchestrator:8003
+      AUDIO_ENGINE_URL: http://audio-engine:8002
+      LLM_SERVER_URL: http://llm-server:8001
+      QDRANT_URL: http://vector-db:6333
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      MLFLOW_URL: http://mlflow-server:5000
+      API_KEY: ${API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+    ports: ["127.0.0.1:${API_GATEWAY_PORT:-8000}:8000"]
+    depends_on:
+      agent-orchestrator:
+        condition: service_healthy
+    healthcheck:
+      <<: *python-health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [cardio-network]
+
+  mlflow-server:
+    build:
+      context: .
+      dockerfile: docker/mlflow-server.Dockerfile
+    ports: ["127.0.0.1:5000:5000"]
+    volumes: [mlflow-data:/mlflow]
+    healthcheck:
+      <<: *python-health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [cardio-network]
 
 networks:
   cardio-network:
+    name: cardio-network
+
+volumes:
+  mlflow-data:
+  qdrant-data:
