@@ -19,9 +19,7 @@ env/
 ourdataset/
 data/
 datasets/
-models/*.pt
-models/*.onnx
-models/*.pkl
+/models/
 *.wav
 vault/
 artifacts/
@@ -44,6 +42,15 @@ htmlcov/
 
 # Notebooks
 .ipynb_checkpoints/
+
+# Local assignment documents and legacy coursework
+/Mini Projet 2026-2027.docx - Mini Projet 2026-2027.pdf
+/updated-documents.pdf
+/TP3.ipynb
+/features.py
+/guide.md
+/notebook_correction.py
+/train_svm.py
 
 # Distribution & builds
 build/
