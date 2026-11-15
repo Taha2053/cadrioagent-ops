@@ -7,7 +7,7 @@ from sklearn.tree import DecisionTreeClassifier
 from audio_engine.contract import features, VERSION
 from audio_engine.deployment import Deployment
 from training.data import split
-from training.benchmark import export_model, metrics
+from training.benchmark import activate, export_model, metrics
 import json
 import hashlib
 
@@ -59,3 +59,20 @@ def test_metrics_expose_degenerate_all_positive_classifier():
     assert score["recall_abnormal"] == 1
     assert score["specificity"] == 0
     assert score["fp"] == 2
+
+
+@pytest.mark.parametrize("parity,specificity", [(0.01, 0.8), (0.0, 0.0)])
+def test_promotion_rejects_failed_parity_or_degenerate_validation(tmp_path, parity, specificity):
+    path = tmp_path / "candidate.onnx"
+    x = np.arange(8, dtype=np.float32).reshape(4, 2)
+    model = DecisionTreeClassifier().fit(x, [0, 0, 1, 1])
+    # These test inputs exercise governance only, not the production feature contract.
+    from skl2onnx import to_onnx
+    path.write_bytes(to_onnx(model, x[:1], options={id(model): {"zipmap": False}}).SerializeToString())
+    path.with_suffix(".json").write_text(json.dumps({
+        "feature_contract": VERSION, "onnx_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "onnx_parity_max_abs": parity, "minimum_specificity": .5,
+        "validation": {"specificity": specificity}}))
+    with pytest.raises(ValueError, match="parity|specificity"):
+        activate(path, tmp_path / "vault")
+    assert not (tmp_path / "vault" / "models" / "cardio_model.onnx").exists()

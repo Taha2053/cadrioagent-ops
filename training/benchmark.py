@@ -186,12 +186,16 @@ def run(args):
                             best = (rank, model, config, score)
                 _, model, config, score = best
                 path = run_path / f"{name}.onnx"
+                import resource
                 parity = export_model(model, kind, path, X[val][:min(16, sum(val))])
                 metadata = {"name": name, "feature_kind": kind, "feature_contract": VERSION,
                     "labels": ["normal", "abnormal"], "threshold": .5, "run_id": child.info.run_id,
                     "parent_run_id": parent.info.run_id, "validation": score, "parameters": config,
+                    "minimum_specificity": args.min_specificity,
                     "onnx_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                    "subset": bool(args.max_files), "onnx_parity_max_abs": parity}
+                    "subset": bool(args.max_files), "onnx_parity_max_abs": parity,
+                    "onnx_bytes": path.stat().st_size,
+                    "process_peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024}
                 path.with_suffix(".json").write_text(json.dumps(metadata, indent=2))
                 mlflow.log_artifact(str(path))
                 mlflow.log_artifact(str(path.with_suffix(".json")))
@@ -235,6 +239,10 @@ def activate(path: Path, vault: Path):
     metadata = json.loads(path.with_suffix(".json").read_text())
     if metadata["feature_contract"] != VERSION or metadata["onnx_sha256"] != hashlib.sha256(path.read_bytes()).hexdigest():
         raise ValueError("Artifact hash/feature contract mismatch")
+    if not 0 <= metadata["onnx_parity_max_abs"] <= 1e-4:
+        raise ValueError("Artifact has not passed ONNX probability parity")
+    if metadata["validation"]["specificity"] < metadata["minimum_specificity"]:
+        raise ValueError("Artifact fails the validation specificity gate")
     ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
     target = vault / "models"
     target.mkdir(parents=True, exist_ok=True)
@@ -260,8 +268,10 @@ def main():
     parser.add_argument("--rebuild-manifest", action="store_true")
     parser.add_argument("--activate", action="store_true")
     args = parser.parse_args()
-    if args.trials < 1 or args.epochs < 1 or args.max_files < 0:
-        parser.error("Trials/epochs must be positive and max-files nonnegative")
+    if args.trials < 1 or args.epochs < 1 or args.max_files < 0 or args.batch_size < 1:
+        parser.error("Trials, epochs and batch size must be positive; max-files nonnegative")
+    if not 0 < args.min_specificity <= 1:
+        parser.error("Minimum specificity must be in (0, 1]")
     run(args)
 
 if __name__ == "__main__":
