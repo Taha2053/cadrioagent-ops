@@ -1,0 +1,254 @@
+{
+  "run_id": "73e89075b35d4eefb46a25d55b183cb4",
+  "champion": "decision_tree",
+  "complete_five_model_benchmark": true,
+  "subset": false,
+  "models": [
+    {
+      "name": "decision_tree",
+      "feature_kind": "mfcc",
+      "feature_contract": "pcg-2000hz-5s-mfcc40-mel96-v1",
+      "labels": [
+        "normal",
+        "abnormal"
+      ],
+      "threshold": 0.5,
+      "run_id": "3ad74f18b00f4fae92223f43869a235f",
+      "parent_run_id": "73e89075b35d4eefb46a25d55b183cb4",
+      "validation": {
+        "accuracy": 0.7449324324324325,
+        "recall_abnormal": 0.952,
+        "specificity": 0.6895074946466809,
+        "precision_abnormal": 0.45075757575757575,
+        "f1_abnormal": 0.6118251928020566,
+        "auroc": 0.8921370449678799,
+        "auprc": 0.6454243719218767,
+        "tn": 322,
+        "fp": 145,
+        "fn": 6,
+        "tp": 119
+      },
+      "parameters": {
+        "max_depth": 3,
+        "min_samples_leaf": 3
+      },
+      "minimum_specificity": 0.5,
+      "onnx_sha256": "af3d7d220a470895f77d9d58067ff3c6e2e37594e5a4c627c016abc57d1e9d54",
+      "subset": false,
+      "onnx_parity_max_abs": 2.136812005115729e-08,
+      "onnx_bytes": 1160,
+      "process_peak_rss_mb": 449.41796875,
+      "test": {
+        "accuracy": 0.768581081081081,
+        "recall_abnormal": 0.984,
+        "specificity": 0.7109207708779444,
+        "precision_abnormal": 0.47674418604651164,
+        "f1_abnormal": 0.6422976501305483,
+        "auroc": 0.9087537473233405,
+        "auprc": 0.6600916280540096,
+        "tn": 332,
+        "fp": 135,
+        "fn": 2,
+        "tp": 123
+      },
+      "test_seconds_per_recording": 4.04946841209076e-05
+    },
+    {
+      "name": "svm",
+      "feature_kind": "mfcc",
+      "feature_contract": "pcg-2000hz-5s-mfcc40-mel96-v1",
+      "labels": [
+        "normal",
+        "abnormal"
+      ],
+      "threshold": 0.5,
+      "run_id": "491f66017f8b41ad964b24d129f45774",
+      "parent_run_id": "73e89075b35d4eefb46a25d55b183cb4",
+      "validation": {
+        "accuracy": 0.8851351351351351,
+        "recall_abnormal": 0.72,
+        "specificity": 0.9293361884368309,
+        "precision_abnormal": 0.7317073170731707,
+        "f1_abnormal": 0.7258064516129032,
+        "auroc": 0.9453704496788009,
+        "auprc": 0.7495318583899833,
+        "tn": 434,
+        "fp": 33,
+        "fn": 35,
+        "tp": 90
+      },
+      "parameters": {
+        "C": 1.0,
+        "gamma": 0.01
+      },
+      "minimum_specificity": 0.5,
+      "onnx_sha256": "9d321f549e5fa21f2221106d66a7585672b5a4c0e5307099aa162ed731845d55",
+      "subset": false,
+      "onnx_parity_max_abs": 2.435463829608686e-06,
+      "onnx_bytes": 349084,
+      "process_peak_rss_mb": 461.32421875,
+      "test": {
+        "accuracy": 0.9121621621621622,
+        "recall_abnormal": 0.768,
+        "specificity": 0.9507494646680942,
+        "precision_abnormal": 0.8067226890756303,
+        "f1_abnormal": 0.7868852459016393,
+        "auroc": 0.9606509635974304,
+        "auprc": 0.8188269517086103,
+        "tn": 444,
+        "fp": 23,
+        "fn": 29,
+        "tp": 96
+      },
+      "test_seconds_per_recording": 8.68982449323871e-05
+    },
+    {
+      "name": "cnn",
+      "feature_kind": "mel",
+      "feature_contract": "pcg-2000hz-5s-mfcc40-mel96-v1",
+      "labels": [
+        "normal",
+        "abnormal"
+      ],
+      "threshold": 0.5,
+      "run_id": "2aca84ac33024f4e954049eb0f46a1b5",
+      "parent_run_id": "73e89075b35d4eefb46a25d55b183cb4",
+      "validation": {
+        "accuracy": 0.7922297297297297,
+        "recall_abnormal": 0.72,
+        "specificity": 0.8115631691648822,
+        "precision_abnormal": 0.5056179775280899,
+        "f1_abnormal": 0.594059405940594,
+        "auroc": 0.8739357601713063,
+        "auprc": 0.5676726840849172,
+        "tn": 379,
+        "fp": 88,
+        "fn": 35,
+        "tp": 90
+      },
+      "parameters": {
+        "learning_rate": 0.001
+      },
+      "minimum_specificity": 0.5,
+      "onnx_sha256": "8184d5ceaf5a88cee9f3667312a74283e08775617375e70ba07a69926ce0d763",
+      "subset": false,
+      "onnx_parity_max_abs": 1.1920928955078125e-07,
+      "onnx_bytes": 96911,
+      "process_peak_rss_mb": 1751.1171875,
+      "test": {
+        "accuracy": 0.8277027027027027,
+        "recall_abnormal": 0.832,
+        "specificity": 0.8265524625267666,
+        "precision_abnormal": 0.5621621621621622,
+        "f1_abnormal": 0.6709677419354839,
+        "auroc": 0.8931220556745182,
+        "auprc": 0.6063983733337815,
+        "tn": 386,
+        "fp": 81,
+        "fn": 21,
+        "tp": 104
+      },
+      "test_seconds_per_recording": 0.0005920546351351706
+    },
+    {
+      "name": "resnet50",
+      "feature_kind": "mel",
+      "feature_contract": "pcg-2000hz-5s-mfcc40-mel96-v1",
+      "labels": [
+        "normal",
+        "abnormal"
+      ],
+      "threshold": 0.5,
+      "run_id": "0434e0da002247a5a804429536f1ced9",
+      "parent_run_id": "73e89075b35d4eefb46a25d55b183cb4",
+      "validation": {
+        "accuracy": 0.902027027027027,
+        "recall_abnormal": 0.832,
+        "specificity": 0.9207708779443254,
+        "precision_abnormal": 0.7375886524822695,
+        "f1_abnormal": 0.7819548872180451,
+        "auroc": 0.9607880085653105,
+        "auprc": 0.8653044772789844,
+        "tn": 430,
+        "fp": 37,
+        "fn": 21,
+        "tp": 104
+      },
+      "parameters": {
+        "learning_rate": 0.0001
+      },
+      "minimum_specificity": 0.5,
+      "onnx_sha256": "d259b8bc03116c79728d3661c44367315f0bfe7b1fb807beff4ca57f1cf65614",
+      "subset": false,
+      "onnx_parity_max_abs": 7.152557373046875e-07,
+      "onnx_bytes": 94070259,
+      "process_peak_rss_mb": 5592.95703125,
+      "test": {
+        "accuracy": 0.9003378378378378,
+        "recall_abnormal": 0.76,
+        "specificity": 0.9379014989293362,
+        "precision_abnormal": 0.7661290322580645,
+        "f1_abnormal": 0.7630522088353414,
+        "auroc": 0.960051391862955,
+        "auprc": 0.861844522874365,
+        "tn": 438,
+        "fp": 29,
+        "fn": 30,
+        "tp": 95
+      },
+      "test_seconds_per_recording": 0.008035487682432913
+    },
+    {
+      "name": "transformer_cnn",
+      "feature_kind": "mel",
+      "feature_contract": "pcg-2000hz-5s-mfcc40-mel96-v1",
+      "labels": [
+        "normal",
+        "abnormal"
+      ],
+      "threshold": 0.5,
+      "run_id": "8b1d2d6b9281457e8eb6b280702bc7bb",
+      "parent_run_id": "73e89075b35d4eefb46a25d55b183cb4",
+      "validation": {
+        "accuracy": 0.8378378378378378,
+        "recall_abnormal": 0.904,
+        "specificity": 0.8201284796573876,
+        "precision_abnormal": 0.5736040609137056,
+        "f1_abnormal": 0.7018633540372671,
+        "auroc": 0.9458672376873662,
+        "auprc": 0.8357978629300834,
+        "tn": 383,
+        "fp": 84,
+        "fn": 12,
+        "tp": 113
+      },
+      "parameters": {
+        "learning_rate": 0.0001
+      },
+      "minimum_specificity": 0.5,
+      "onnx_sha256": "8dcfa99a55d130bc81aac60379450ea7002de45402c4374eeb109ef99e9548b6",
+      "subset": false,
+      "onnx_parity_max_abs": 2.086162567138672e-07,
+      "onnx_bytes": 448145,
+      "process_peak_rss_mb": 5603.484375,
+      "test": {
+        "accuracy": 0.8581081081081081,
+        "recall_abnormal": 0.904,
+        "specificity": 0.8458244111349036,
+        "precision_abnormal": 0.6108108108108108,
+        "f1_abnormal": 0.7290322580645161,
+        "auroc": 0.9458158458244111,
+        "auprc": 0.8040168098178528,
+        "tn": 395,
+        "fp": 72,
+        "fn": 12,
+        "tp": 113
+      },
+      "test_seconds_per_recording": 0.0005657289797288802
+    }
+  ],
+  "registered_model": {
+    "name": "CardioAgentAudio",
+    "version": 4
+  }
+}

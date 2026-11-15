@@ -1,11 +1,18 @@
 # Measured results
 
-These are observed experiments, not a completed five-model comparison or clinical validation.
+These are completed research experiments, not clinical validation.
 
-## Classical benchmark
+## Full five-model benchmark
 
-`classical-baseline.json` is the recorded MLflow run `13830edecb444fc5b836d97bb6216b92`.
-Both algorithms used all 2,960 eligible recordings after source-label/SQI/duplicate filtering;
+`five-model-benchmark.json` records MLflow run `73e89075b35d4eefb46a25d55b183cb4`.
+All five families were trained, tuned on validation, exported and evaluated on CPU.
+The command used up to 20 epochs per deep-training phase, batch size 16, six CPU
+threads and at most six trials: four tree configurations, six SVM configurations,
+and two learning rates for each deep model. Early stopping used validation loss.
+ResNet50 used ImageNet weights, frozen-backbone warmup and top-stage fine-tuning.
+The complete command, including preparation/export/registration, took 33.2 minutes.
+
+All algorithms used the same 2,960 eligible recordings after source-label/SQI/duplicate filtering;
 1,112 source rows were excluded. Acquisition/recording-group split: 1,776 training,
 592 validation, 592 test. Test prevalence: 125 abnormal / 592 total (21.1%).
 No verified patient mapping exists: this is **not patient-independent validation**.
@@ -15,16 +22,33 @@ Only the first five seconds of each recording are represented.
 |---|---:|---:|---:|---:|---:|
 | Decision Tree | 98.4% | 71.09% | 47.67% | 0.9088 | 0.6601 |
 | RBF SVM | 76.8% | 95.07% | 80.67% | 0.9607 | 0.8188 |
+| CNN from scratch | 83.2% | 82.66% | 56.22% | 0.8931 | 0.6064 |
+| ResNet50 transfer learning | 76.0% | 93.79% | 76.61% | 0.9601 | 0.8618 |
+| Transformer–CNN | 90.4% | 84.58% | 61.08% | 0.9458 | 0.8040 |
 
 The tree was selected on **validation**, not these test results: validation recall
 95.2%, specificity 68.95%, above the preset 0.5 specificity gate. On test it produced
 123 true positives, 2 false negatives, **135 false positives**, and 332 true negatives.
-The SVM has much better specificity and precision; recall-first selection is a
-research specification decision, not proof the tree is clinically preferable.
+The SVM has much better specificity and precision; ResNet50 has the highest
+test AUPRC. Recall-first selection is a research specification decision, not
+proof the tree is clinically preferable. No algorithm was selected using test scores.
 
-ONNX/Python maximum probability differences on the export verification batch:
-2.14e-8 (tree), 2.44e-6 (SVM), both below 1e-4. Export parity is numerical consistency,
-not an independent accuracy evaluation.
+| Model | ONNX bytes | Maximum export probability difference |
+|---|---:|---:|
+| Decision Tree | 1,160 | 2.14e-8 |
+| RBF SVM | 349,084 | 2.44e-6 |
+| CNN from scratch | 96,911 | 1.19e-7 |
+| ResNet50 | 94,070,259 | 7.15e-7 |
+| Transformer–CNN | 448,145 | 2.09e-7 |
+
+Every export passed the 1e-4 numerical parity gate. This checks consistency, not
+independent accuracy. The training process reached a cumulative high-water mark
+of about 5,603 MiB RSS; the per-model JSON high-water fields include earlier models
+and cannot be interpreted as isolated per-model memory requirements.
+
+`classical-baseline.json` retains the earlier two-model run. Registry version
+numbers in the full report belong to the offline training store; live promotion
+records its own version in `vault/models/registry.json` and retains source run IDs.
 
 ## Inference and retrieval smoke verification
 
@@ -87,7 +111,7 @@ needed before interpreting either request as representative latency or reliabili
 
 ## Outstanding evidence before quality claims
 
-- Complete GPU training/tuning and held-out comparison of the three deep model families.
+- Independent GPU reproduction and broader hyperparameter-budget comparisons, if required.
 - Clinician-adjudicated retrieval/LLM safety and clinical-correctness evaluations.
 - Verified patient identities or a genuinely independent external dataset.
 - Probability calibration and confidence intervals on a separately reserved cohort.

@@ -68,9 +68,9 @@ Open <http://localhost:8000>. Liveness can be green before an artifact or index
 is available; the workbench's **Check services** uses readiness, not just liveness.
 On a fresh checkout, train a model and index the corpus before analysis.
 
-Measured classical results and verification limits are recorded in
-[`results/README.md`](results/README.md); they are not a completed five-model
-GPU comparison or a medical-readiness claim.
+The completed five-model CPU comparison and verification limits are recorded in
+[`results/README.md`](results/README.md), with machine-readable metrics in
+`results/five-model-benchmark.json`. These are research results, not medical readiness.
 
 The initializer never overwrites `.env`. The example contains no key. Set keys
 only in your existing local `.env`. Do not publish `.env`, datasets, recordings,
