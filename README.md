@@ -72,6 +72,15 @@ The completed five-model CPU comparison and verification limits are recorded in
 [`results/README.md`](results/README.md), with machine-readable metrics in
 `results/five-model-benchmark.json`. These are research results, not medical readiness.
 
+For the evaluation, read the [ten-page oral-defense guide](docs/CardioAgent-Ops-Defense-Guide.pdf):
+architecture, model choices, real metrics, signal/window versus PDF chunking,
+MLOps, a live demo runbook, limitations and rehearsal questions.
+Rebuild it from its source with:
+
+```bash
+uv run --locked --group docs python docs/build_defense_guide.py
+```
+
 The initializer never overwrites `.env`. The example contains no key. Set keys
 only in your existing local `.env`. Do not publish `.env`, datasets, recordings,
 weights, or the vault.
