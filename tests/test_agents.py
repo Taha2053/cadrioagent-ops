@@ -1,5 +1,4 @@
 import asyncio
-import json
 import httpx
 from fastapi.testclient import TestClient
 from agents.schemas import Report, audit
