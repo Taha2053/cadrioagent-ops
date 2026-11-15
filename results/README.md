@@ -58,6 +58,8 @@ final audit. The inference image was inspected: neither TensorFlow nor PyTorch i
 installed. Core verification passed 28 tests; the optional deep-export verification
 separately passed all three CNN/ResNet/Transformer–CNN cases. Core test coverage
 was 59%; CLI training/ingestion smoke runs are not counted as unit coverage.
+The [GitHub Actions run for `a1a41f8`](https://github.com/Taha2053/cadrioagent-ops/actions/runs/43727992750)
+also completed successfully, including the test job and six image builds.
 
 ## Live resource snapshot
 
