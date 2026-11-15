@@ -222,14 +222,14 @@ def run(args):
             name="champion", registered_model_name="CardioAgentAudio")
         client = mlflow.MlflowClient()
         version = registered.registered_model_version
-        if version:
-            client.set_registered_model_alias("CardioAgentAudio", "champion", str(version))
         result["registered_model"] = {"name": "CardioAgentAudio", "version": version}
         report_path.write_text(json.dumps(result, indent=2))
         mlflow.log_artifact(str(report_path))
         mlflow.log_metrics({f"champion_test_{k}": v for k, v in winner["test"].items()})
         if args.activate:
             activate(run_path / f"{winner['name']}.onnx", vault)
+            if version:
+                client.set_registered_model_alias("CardioAgentAudio", "champion", str(version))
         print(json.dumps(result, indent=2))
         return result
 
