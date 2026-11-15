@@ -1,0 +1,7 @@
+fastapi==0.141.1
+librosa==1.0.0
+mlflow-skinny==3.16.1
+numpy==2.5.3
+onnxruntime>=1.23,<2
+python-multipart==0.0.32
+uvicorn==0.54.0

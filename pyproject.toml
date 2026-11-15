@@ -1,11 +1,47 @@
 [project]
 name = "cadrioagent-ops"
 version = "0.1.0"
-description = "Add your description here"
+description = "Reproducible cardio-acoustic research, grounded agents, and MLOps"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
+    "joblib>=1.6.0",
+    "librosa>=1.0.0",
+    "matplotlib>=3.11.2",
+    "mlflow",
+    "numpy>=2.5.3",
+    "pycm==0.8.1",
     "python-multipart>=0.0.32",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "seaborn>=0.13.2",
     "uvicorn>=0.54.0",
+    "httpx>=0.28,<1",
+    "onnxruntime>=1.23,<2",
+    "onnx>=1.17,<2",
+    "skl2onnx>=1.19,<2",
+    "langgraph>=1,<2",
+    "qdrant-client>=1.12,<2",
+    "fastembed>=0.7,<1",
+    "pypdf>=5,<7",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28,<1",
+    "pytest>=9,<10",
+    "pytest-cov>=6,<8",
+    "nbformat>=5,<6",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[project.optional-dependencies]
+deep-learning = [
+    "tensorflow>=2.20,<3",
+    "tf2onnx>=1.16,<2",
+    "ipykernel>=6",
 ]
