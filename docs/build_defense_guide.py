@@ -1,4 +1,4 @@
-"""Build the ten-page study PDF: uv run --locked --group docs python docs/build_defense_guide.py.
+"""Build the study PDF: uv run --locked --group docs python docs/build_defense_guide.py.
 
 Metrics and artifact sizes come from the committed benchmark, not invented examples.
 The remaining explanations describe the active source modules, not legacy coursework.
@@ -570,8 +570,57 @@ def viva_page():
     return out
 
 
+def launch_page():
+    out = page("Quick launch & how it works", "11 / TERMINAL CHEAT SHEET — Run commands from the cardioagent-ops project directory.")
+    out += [
+        h("1 · Start the local LLM (terminal 1)"),
+        code("OLLAMA_HOST=0.0.0.0:11434 ollama serve"),
+        p('Leave it running. If Ollama already runs as a service, do not start another instance; '
+          'configure that service to accept Docker-to-host connections. Binding to 0.0.0.0 also '
+          'exposes Ollama to your network: use a trusted network/firewall.', "small"),
+        h("2 · Prepare and launch (terminal 2)"),
+        code("uv sync --locked --dev\n"
+             "uv run python scripts/init_vault.py\n"
+             "ollama pull mistral:7b-instruct\n"
+             "docker compose up --build -d\n"
+             "docker compose ps\n"
+             "docker compose port api-gateway 8000"),
+        p('Initialization preserves the existing .env. Pull downloads the model only if needed. '
+          'The last command prints the actual app port: default <b>http://localhost:8000</b>; '
+          'this project’s configured demo uses <b>http://localhost:8080</b>. '
+          'MLflow: <b>http://localhost:5000</b>. Open the app and click <b>Check services</b>.', "small"),
+        h("3 · First launch only: populate the PDF index"),
+        code("docker compose exec agent-orchestrator \\\n"
+             "  python -m rag_engine.ingest --vault /vault --fetch"),
+        p('Wait for the orchestrator container to be running. This indexes the professional ESC/EACTS '
+          '2025 valvular guideline and its patient companion. Existing model/PDF files live in the vault; '
+          'no retraining is needed to launch with a verified artifact. An empty Qdrant volume still '
+          'needs ingestion. Wait for completion before analysis.', "small"),
+        h("4 · What happens when you upload a WAV"),
+        p('<b>Gateway (8000 inside Docker)</b> serves the UI and forwards requests. '
+          '<b>Orchestrator (8003)</b> runs exactly three specialized graph agents. '
+          '<b>Audio engine (8002)</b> preprocesses the WAV and runs the verified ONNX classifier. '
+          '<b>Qdrant (6333)</b> returns embedded PDF passages. <b>LLM facade (8001)</b> calls host '
+          'Ollama/Mistral to generate text from derived results and retrieved evidence—not raw audio. '
+          'The graph audits the report before acceptance. <b>MLflow (5000)</b> tracks experiments '
+          'and model provenance. No LLM fine-tuning is performed.'),
+        h("5 · Diagnose, stop and restart"),
+        code("curl --fail http://localhost:8001/ready\n"
+             "docker compose logs -f --tail=50\n"
+             "# Ctrl+C exits log following; containers keep running\n"
+             "docker compose down\n"
+             "# Next launch: start Ollama, then:\n"
+             "docker compose up -d"),
+        p('Do not use <b>down -v</b>: it deletes named volumes, including the index and MLflow data. '
+          'No reinstall, model download or reindex is needed on normal restarts. '
+          'Missing dependencies/artifacts mean unavailable—not a fallback prediction. '
+          '<b>Research only; acoustic labels are not clinical diagnoses.</b>', "small"),
+    ]
+    return out
+
+
 PAGES = [overview, data_page, audio_page, models_page, metrics_page,
-         mlops_page, rag_page, agents_page, demo_page, viva_page]
+         mlops_page, rag_page, agents_page, demo_page, viva_page, launch_page]
 
 
 def decorate(canvas, document):
@@ -585,7 +634,7 @@ def decorate(canvas, document):
     canvas.setFillColor(MUTED)
     canvas.setFont("Body", 7.3)
     canvas.drawString(42, 22, "Research only • Source-backed results • Never a medical diagnosis")
-    canvas.drawRightString(A4[0] - 42, 22, f"{document.page} / 10")
+    canvas.drawRightString(A4[0] - 42, 22, f"{document.page} / {len(PAGES)}")
     canvas.restoreState()
 
 
@@ -602,16 +651,16 @@ def main():
         story.extend(elements)
     document = SimpleDocTemplate(str(OUTPUT), pagesize=A4,
         rightMargin=42, leftMargin=42, topMargin=56, bottomMargin=44,
-        title="CardioAgent-Ops — Ten-page Oral Defense Guide",
+        title="CardioAgent-Ops — Oral Defense Guide with Launch Appendix",
         author="CardioAgent-Ops project", subject="Architecture, data, models, evaluation and demonstration",
         pageCompression=1)
     document.build(story, onFirstPage=decorate, onLaterPages=decorate)
     pages = PdfReader(OUTPUT).pages
-    if len(pages) != 10:
-        raise ValueError(f"Expected exactly 10 pages, generated {len(pages)}; fix content/layout")
+    if len(pages) != len(PAGES):
+        raise ValueError(f"Expected exactly {len(PAGES)} pages, generated {len(pages)}; fix content/layout")
     for number, (pdf_page, title) in enumerate(zip(pages, titles), 1):
         text = " ".join(pdf_page.extract_text().split())
-        if title not in text or f"{number} / 10" not in text:
+        if title not in text or f"{number} / {len(PAGES)}" not in text:
             raise ValueError(f"Content moved away from its intended page: {title}")
     print(f"Built {OUTPUT.relative_to(ROOT)}: {len(pages)} pages, {OUTPUT.stat().st_size:,} bytes")
 

@@ -72,7 +72,7 @@ The completed five-model CPU comparison and verification limits are recorded in
 [`results/README.md`](results/README.md), with machine-readable metrics in
 `results/five-model-benchmark.json`. These are research results, not medical readiness.
 
-For the evaluation, read the [ten-page oral-defense guide](docs/CardioAgent-Ops-Defense-Guide.pdf):
+For the evaluation, read the [oral-defense guide with a final-page launch cheat sheet](docs/CardioAgent-Ops-Defense-Guide.pdf):
 architecture, model choices, real metrics, signal/window versus PDF chunking,
 MLOps, a live demo runbook, limitations and rehearsal questions.
 Rebuild it from its source with:
